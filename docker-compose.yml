@@ -4,6 +4,8 @@ services:
     container_name: eureka-server
     ports:
       - "8761:8761"
+    networks:
+      - service-network
 
   microservice-1:
     image: microservice-1
@@ -14,6 +16,8 @@ services:
       - eureka-server
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - service-network
 
   microservice-2:
     image: microservice-2
@@ -24,6 +28,8 @@ services:
       - eureka-server
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - service-network
 
   postgres:
     image: postgres:15-alpine
@@ -36,6 +42,8 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend-network
 
   microservice-3:
     image: microservice-3
@@ -50,6 +58,15 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/microservice3_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
+    networks:
+      - service-network
+      - backend-network
+
+networks:
+  service-network:
+    driver: bridge
+  backend-network:
+    driver: bridge
 
 volumes:
   postgres_data:
