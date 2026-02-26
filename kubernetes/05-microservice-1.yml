@@ -1,0 +1,51 @@
+# ==============================================================================
+# File: 05-microservice-1.yml
+# Purpose: Runs Microservice 1 (Which calls Microservice 2 on /hello).
+# Connection: Pulls Eureka disable envs from '02-configmap.yml'.
+#             Exposed internally by its 'microservice-1' Service below.
+#             Routed externally via the '09-ingress.yml' controller.
+#             Scaled automatically by '08-hpa.yml'.
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microservice-1
+spec:
+  replicas: 3 # 3 Pods running concurrently to handle load
+  selector:
+    matchLabels:
+      app: microservice-1
+  template:
+    metadata:
+      labels:
+        app: microservice-1
+    spec:
+      containers:
+        - name: microservice-1
+          image: fergusdaw2000/microservice-1
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - configMapRef: # Pulls all variables from 02-configmap.yml
+                name: microservice-config
+          resources: # Required defining memory/cpu limits for HPA to work!
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+# The internal Service representing MS1
+apiVersion: v1
+kind: Service
+metadata:
+  name: microservice-1
+spec:
+  type: ClusterIP # Load balances request amongst the 3 replicas internally
+  selector:
+    app: microservice-1
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081

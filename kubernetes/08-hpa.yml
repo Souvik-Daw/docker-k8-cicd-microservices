@@ -1,0 +1,63 @@
+# ==============================================================================
+# File: 08-hpa.yml
+# Purpose: Horizontal Pod Autoscaler dynamically adds or removes Pods based on CPU.
+# Connection: Continuously monitors CPU Utilization of Deployments 05, 06, and 07.
+#             Requires that MS Deployments defined 'requests' & 'limits' resources.
+#             Will scale down to 3 pods if idle, or up to 5 pods if under load.
+# ==============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: microservice-1-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: microservice-1
+  minReplicas: 3 # Scale down to 3 when quiet
+  maxReplicas: 5 # Scale up to 5 when busy
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70 # Trigger scaling if CPU hits 70%
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: microservice-2-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: microservice-2
+  minReplicas: 3
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: microservice-3-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: microservice-3
+  minReplicas: 3
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70

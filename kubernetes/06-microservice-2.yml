@@ -1,0 +1,52 @@
+# ==============================================================================
+# File: 06-microservice-2.yml
+# Purpose: Runs Microservice 2 (The destination of MS1's REST call).
+# Connection: Receives calls from '05-microservice-1.yml'.
+#             Configured by '02-configmap.yml'.
+#             Exposed externally via '09-ingress.yml'.
+#             Scaled automatically by '08-hpa.yml'.
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microservice-2
+spec:
+  replicas: 3 # 3 Pods running concurrently
+  selector:
+    matchLabels:
+      app: microservice-2
+  template:
+    metadata:
+      labels:
+        app: microservice-2
+    spec:
+      containers:
+        - name: microservice-2
+          image: fergusdaw2000/microservice-2
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: microservice-config
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+# Internal DNS Name: "http://microservice-2:8082" 
+# This is explicitly what MS1 searches for in the Java code!
+apiVersion: v1
+kind: Service
+metadata:
+  name: microservice-2
+spec:
+  type: ClusterIP
+  selector:
+    app: microservice-2
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082

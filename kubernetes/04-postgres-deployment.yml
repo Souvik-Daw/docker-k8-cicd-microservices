@@ -1,0 +1,64 @@
+# ==============================================================================
+# File: 04-postgres-deployment.yml
+# Purpose: Deploys the actual Postgres Database and exposes it to the internal cluster.
+# Connection: Mounts PVC from '03-postgres-storage.yml'.
+#             Pulls passwords from '01-postgres-secret.yml'.
+#             Is accessed securely over the network by '07-microservice-3.yml'.
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment # Manages the DB Pods
+metadata:
+  name: postgres
+spec:
+  replicas: 1 # Only 1 Database
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine # The Docker image itself
+          ports:
+            - containerPort: 5432
+          env:      # Dynamically inject credentials from the K8s Secret!
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_DB
+          volumeMount: # Mount the persistent storage volume!
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-storage
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc # Connect to the PVC generated in File 03.
+---
+# This allows other pods (like MS3) to find the database via native K8DNS
+# e.g connecting to "jdbc:postgresql://postgres:5432"
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  type: ClusterIP # Internal routing only! Not publicly accessible to internet.
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

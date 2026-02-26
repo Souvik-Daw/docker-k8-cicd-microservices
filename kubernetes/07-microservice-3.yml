@@ -1,0 +1,61 @@
+# ==============================================================================
+# File: 07-microservice-3.yml
+# Purpose: Runs Microservice 3 which requires a live Postgres Database connection.
+# Connection: Pulls Eureka disable envs & JDBC URL from '02-configmap.yml'.
+#             Pulls secure database credentials from '01-postgres-secret.yml'.
+#             Sends network traffic over to '04-postgres-deployment.yml' service.
+#             Scaled by '08-hpa.yml' and Routed externally via '09-ingress.yml'.
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microservice-3
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: microservice-3
+  template:
+    metadata:
+      labels:
+        app: microservice-3
+    spec:
+      containers:
+        - name: microservice-3
+          image: fergusdaw2000/microservice-3
+          ports:
+            - containerPort: 8083
+          envFrom: # Pull map
+            - configMapRef:
+                name: microservice-config
+          env: # Pull secrets
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: microservice-3
+spec:
+  type: ClusterIP
+  selector:
+    app: microservice-3
+  ports:
+    - protocol: TCP
+      port: 8083
+      targetPort: 8083
