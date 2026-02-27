@@ -1,0 +1,42 @@
+# ==============================================================================
+# File: 09-ingress.yml
+# Purpose: API Gateway that safely exposes INTERNAL microservices to the PUBLIC internet.
+# Connection: Receives web traffic from outside (via NGINX), then forwards traffic
+#             to the correct backend 'ClusterIP' Services defined in files 05,06,07.
+# Examples:   http://<EC2-IP>/ms1/hello   -> microservice-1:8081/hello
+#             http://<EC2-IP>/ms2/hello   -> microservice-2:8082/hello
+# ==============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: microservices-ingress
+  annotations:
+    # Trims the path. e.g. trims "/ms1" off before sending to internal MS "/hello" endpoint.
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx # Dictates that NGINX operates this Ingress Controller
+  rules:
+    - http:
+        paths:
+          # Define Routing Map
+          - path: /ms1(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: microservice-1 # Forwards to the MS1 Service 
+                port:
+                  number: 8081
+          - path: /ms2(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: microservice-2 # Forwards to the MS2 Service
+                port:
+                  number: 8082
+          - path: /ms3(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: microservice-3 # Forwards to the MS3 Service
+                port:
+                  number: 8083

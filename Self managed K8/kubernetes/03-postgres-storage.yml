@@ -1,0 +1,31 @@
+# ==============================================================================
+# File: 03-postgres-storage.yml
+# Purpose: Provisions physical persistent storage so database data survives pod crashes.
+# Connection: The PVC created here is mounted by '04-postgres-deployment.yml'.
+# ==============================================================================
+apiVersion: v1
+kind: PersistentVolume # The actual block of storage on the Node
+metadata:
+  name: postgres-pv
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data/postgres" # Where data physically lives on the EC2 drive
+---
+apiVersion: v1
+kind: PersistentVolumeClaim # The request from the deployment to use the above Volume
+metadata:
+  name: postgres-pvc
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

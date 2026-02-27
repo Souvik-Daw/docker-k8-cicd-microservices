@@ -1,0 +1,21 @@
+# ==============================================================================
+# File: 02-configmap.yml
+# Purpose: Stores non-sensitive configuration data (environment variables).
+# Connection: This ConfigMap is consumed by ALL microservice Deployments 
+#             (05, 06, 07) to inject these environment variables inside their Pods.
+#             This explicitly tells Spring Boot NOT to use Eureka.
+# ==============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: microservice-config
+  labels:
+    app: microservices
+data:
+  # Disable Eureka Client since we are using Kubernetes Native Service Discovery
+  # This overrides the application.properties inside the JAR files so they don't break.
+  EUREKA_CLIENT_ENABLED: "false"
+  EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+  EUREKA_CLIENT_FETCH_REGISTRY: "false"
+  # Spring Data Source for MS3, notice it points to the "postgres" Service name!
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/microservice3_db"

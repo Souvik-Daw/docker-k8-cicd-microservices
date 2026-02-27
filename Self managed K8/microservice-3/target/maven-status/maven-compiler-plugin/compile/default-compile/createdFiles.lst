@@ -1,0 +1,5 @@
+com\example\microservice3\repository\ItemRepository.class
+com\example\microservice3\service\ItemService.class
+com\example\microservice3\Microservice3Application.class
+com\example\microservice3\controller\ItemController.class
+com\example\microservice3\model\Item.class
