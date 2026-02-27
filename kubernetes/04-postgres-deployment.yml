@@ -40,7 +40,7 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: POSTGRES_DB
-          volumeMount: # Mount the persistent storage volume!
+          volumeMounts: # Mount the persistent storage volume!
             - mountPath: /var/lib/postgresql/data
               name: postgres-storage
       volumes:
