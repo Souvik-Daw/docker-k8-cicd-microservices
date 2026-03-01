@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class Microservice2Application {
     public static void main(String[] args) {
         SpringApplication.run(Microservice2Application.class, args);
+        System.out.println("Microservice 2 started");
     }
 
     @GetMapping("/hello")
