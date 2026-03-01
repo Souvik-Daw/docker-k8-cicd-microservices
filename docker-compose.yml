@@ -1,6 +1,6 @@
 services:
   eureka-server:
-    image: fergusdaw2000/eureka-server
+    image: eureka-server
     container_name: eureka-server
     ports:
       - "8761:8761"
@@ -8,7 +8,7 @@ services:
       - service-network
 
   microservice-1:
-    image: fergusdaw2000/microservice-1
+    image: microservice-1
     container_name: microservice-1
     ports:
       - "8081:8081"
@@ -20,7 +20,7 @@ services:
       - service-network
 
   microservice-2:
-    image: fergusdaw2000/microservice-2
+    image: microservice-2
     container_name: microservice-2
     ports:
       - "8082:8082"
@@ -46,7 +46,7 @@ services:
       - backend-network
 
   microservice-3:
-    image: fergusdaw2000/microservice-3
+    image: microservice-3
     container_name: microservice-3
     ports:
       - "8083:8083"

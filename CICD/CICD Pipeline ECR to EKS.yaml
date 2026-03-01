@@ -1,0 +1,68 @@
+name: Deploy m1 and m2 Only
+
+on:
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+  push:
+    paths:
+      - 'microservice-1/**'
+      - 'microservice-2/**'
+    branches:
+      - main
+
+jobs:
+  deploy-m1-m2:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    # --- Build and Push m1 ---
+    - name: Build, tag, and push m1 image to ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: microservice-1
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./microservice-1
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+    # --- Build and Push m2 ---
+    - name: Build, tag, and push m2 image to ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: microservice-2
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./microservice-2
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+    # --- Deploy to EKS ---
+    - name: Update KubeConfig for EKS
+      run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+    - name: Deploy ONLY m1 and m2 to EKS
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        # Dynamically set the new images for m1 and m2 deployments only
+        kubectl set image deployment/microservice-1 microservice-1=$ECR_REGISTRY/microservice-1:$IMAGE_TAG
+        kubectl set image deployment/microservice-2 microservice-2=$ECR_REGISTRY/microservice-2:$IMAGE_TAG
+        
+        # Apply specifically the m1 and m2 manifests
+        kubectl apply -f EKS/05-microservice-1.yaml
+        kubectl apply -f EKS/06-microservice-2.yaml
+        
+        

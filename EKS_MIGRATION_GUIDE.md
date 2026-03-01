@@ -97,7 +97,7 @@ eksctl create cluster \
   --managed
 ```
 
-### Step 3: Install the AWS EBS CSI Driver
+### Step 3: Install the AWS EBS CSI Driver (not use here)
 This allows EKS to provision EBS volumes for your Postgres database:
 ```bash
 eksctl create iamserviceaccount \
@@ -161,7 +161,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 1. Ensure `03-postgres-storage.yml` and `09-ingress.yml` are updated for EKS as shown above.
 2. Apply your manifests!
    ```bash
-   kubectl apply -f kubernetes/
+   kubectl apply -f EKS/
    ```
 
 ### Step 6: Access Your Application
@@ -182,7 +182,7 @@ Do **NOT** just delete the EC2 instances from the AWS Console. If you do, the EK
 ### Step 1: Delete Kubernetes Resources First
 First, you need to tell Kubernetes to delete the Ingress resource, which gracefully prompts AWS to destroy the Application Load Balancer:
 ```bash
-kubectl delete -f kubernetes/
+kubectl delete -f EKS/
 ```
 *Wait a few minutes to ensure the Load Balancer disappears from your AWS EC2 Console under the "Load Balancers" tab before proceeding.*
 

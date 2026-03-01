@@ -1,20 +1,25 @@
 <!-- Github readme-->
 Docker Topics
-docker build images (done)
-docker compose (done)
-docker volumes (done)
-Multi-stage Docker builds (done)
-Docker Networking (done)
-Environment Variables & Secrets (done)
-Push in docker hub and run in ec2 and other devices (done)
-Push in ecr and run in ec2 (done)
+docker build images 
+docker compose
+docker volumes 
+Multi-stage Docker builds 
+Docker Networking 
+Environment Variables & Secrets 
+Push in docker hub and run in ec2 and other devices 
+Push in ecr and run in ec2 
 
 Kubernetes Topics
-Pods & ReplicaSets (done)
-Deployments (done)
-Services (ClusterIP, NodePort, LoadBalancer) (done)
-Ingress Controllers (done)
-ConfigMaps & Secrets (done)
-vertical vs horizontal scaling (HPA) (done)
-Persistent Volumes (PV) & Persistent Volume Claims (PVC) (done)
-AWS EKS hands on (deploy in aws)
+Pods & ReplicaSets
+Deployments 
+Services (ClusterIP, NodePort, LoadBalancer) 
+Ingress Controllers 
+ConfigMaps & Secrets 
+vertical vs horizontal scaling (HPA) 
+Persistent Volumes (PV) & Persistent Volume Claims (PVC) 
+AWS EKS hands on (deploy in aws only m1 and m2)
+
+CI CD
+Deploy m1 and m2 using cicd -> github -> ECR -> EKS -> EC2 
+When make change in code -> push in github -> ECR -> EKS -> EC2 (auto deploy)
+Deploy m1 and m2 using cicd -> github -> ECR -> EC2 
