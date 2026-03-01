@@ -74,6 +74,16 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         envs: ECR_REGISTRY,AWS_REGION
         script: |
+          # Install AWS CLI if it is not installed
+          if ! command -v aws &> /dev/null; then
+              sudo apt-get update && sudo apt-get install -y awscli || sudo yum install -y aws-cli || true
+          fi
+          
+          # Temporarily set AWS credentials using secrets passed to the EC2 action
+          export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          export AWS_DEFAULT_REGION=$AWS_REGION
+          
           # Login to ECR on the EC2 instance
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
           
